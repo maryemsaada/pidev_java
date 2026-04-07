@@ -5,24 +5,21 @@ public class Equipe {
     private String nom;
     private int maxMembers;
     private String logo;
-    private int ownerId;
 
     public Equipe() {
     }
 
-    public Equipe(int id, String nom, int maxMembers, String logo, int ownerId) {
+    public Equipe(int id, String nom, int maxMembers, String logo) {
         this.id = id;
         this.nom = nom;
         this.maxMembers = maxMembers;
         this.logo = logo;
-        this.ownerId = ownerId;
     }
 
-    public Equipe(String nom, int maxMembers, String logo, int ownerId) {
+    public Equipe(String nom, int maxMembers, String logo) {
         this.nom = nom;
         this.maxMembers = maxMembers;
         this.logo = logo;
-        this.ownerId = ownerId;
     }
 
     public int getId() {
@@ -57,21 +54,12 @@ public class Equipe {
         this.logo = logo;
     }
 
-    public int getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(int ownerId) {
-        this.ownerId = ownerId;
-    }
-
     @Override
     public String toString() {
         return "Equipe{" +
                 "id=" + id +
                 ", nom='" + nom + '\'' +
                 ", maxMembers=" + maxMembers +
-                ", ownerId=" + ownerId +
                 '}';
     }
 }

@@ -3,7 +3,6 @@ package org.example.utils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class MyDatabase {
     private static MyDatabase instance;
@@ -11,7 +10,7 @@ public class MyDatabase {
 
     private static final String URL = "jdbc:mysql://localhost:3306/esport-db";
     private static final String USER = "root";
-    private static final String PASSWORD = ""; // ton mot de passe
+    private static final String PASSWORD = ""; 
 
     private MyDatabase() {
         try {
