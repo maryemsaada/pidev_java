@@ -1,11 +1,11 @@
-package org.example.services;
-
-import org.example.entities.Category;
-import org.example.utils.MyDatabase;
+package tn.esprit.services;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import tn.esprit.entities.Category;
+import tn.esprit.utils.MyDatabase;
 
 public class CategoryService {
     private Connection connection;

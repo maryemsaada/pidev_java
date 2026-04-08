@@ -1,8 +1,8 @@
-package org.example.test;
+package  tn.esprit.test;
 
-import org.example.entities.Blog;
-import org.example.services.ServiceBlog;
-import org.example.utils.MyDatabase;
+import  tn.esprit.entities.Blog;
+import  tn.esprit.services.ServiceBlog;
+import  tn.esprit.utils.MyDatabase;
 
 public class MainBlog {
     public static void main(String[] args) {

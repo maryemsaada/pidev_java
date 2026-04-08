@@ -1,4 +1,4 @@
-package org.example.entities;
+package tn.esprit.entities;
 
 public class Category {
     private int id;

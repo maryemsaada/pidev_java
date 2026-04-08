@@ -1,10 +1,10 @@
-package org.example.test;
+package  tn.esprit.test;
 
-import org.example.entities.Category;
-import org.example.entities.Product;
-import org.example.services.CategoryService;
-import org.example.services.ProductService;
-import org.example.utils.MyDatabase;
+import  tn.esprit.entities.Category;
+import  tn.esprit.entities.Product;
+import  tn.esprit.services.CategoryService;
+import  tn.esprit.services.ProductService;
+import  tn.esprit.utils.MyDatabase;
 
 public class MainProduitCategorie {
     public static void main(String[] args) {

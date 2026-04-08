@@ -1,8 +1,8 @@
-package org.example.test;
+package  tn.esprit.test;
 
-import org.example.entities.User;
-import org.example.services.ServiceUser;
-import org.example.utils.MyDatabase;
+import  tn.esprit.entities.User;
+import  tn.esprit.services.ServiceUser;
+import  tn.esprit.utils.MyDatabase;
 
 public class MainUser {
     public static void main(String[] args) {
