@@ -1,7 +1,7 @@
-package org.example.services;
+package tn.esprit.services;
 
-import org.example.entities.Product;
-import org.example.utils.MyDatabase;
+import  tn.esprit.entities.Product;
+import  tn.esprit.utils.MyDatabase;
 
 import java.sql.*;
 import java.util.ArrayList;

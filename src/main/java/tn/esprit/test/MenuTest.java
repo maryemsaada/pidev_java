@@ -1,9 +1,9 @@
-package org.example.test;
+package  tn.esprit.test;
 
-import org.example.entities.Jeu;
-import org.example.entities.Tournoi;
-import org.example.services.ServiceJeu;
-import org.example.services.ServiceTournoi;
+import  tn.esprit.entities.Jeu;
+import  tn.esprit.entities.Tournoi;
+import  tn.esprit.services.ServiceJeu;
+import  tn.esprit.services.ServiceTournoi;
 
 import java.sql.SQLException;
 import java.util.Date;

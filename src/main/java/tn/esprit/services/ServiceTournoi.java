@@ -1,7 +1,7 @@
-package org.example.services;
+package  tn.esprit.services;
 
-import org.example.entities.Tournoi;
-import org.example.utils.MyDatabase;
+import  tn.esprit.entities.Tournoi;
+import  tn.esprit.utils.MyDatabase;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

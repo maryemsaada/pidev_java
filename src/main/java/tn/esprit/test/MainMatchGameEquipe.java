@@ -1,10 +1,10 @@
-package org.example.test;
+package  tn.esprit.test;
 
-import org.example.entities.Equipe;
-import org.example.entities.MatchGame;
-import org.example.services.ServiceEquipe;
-import org.example.services.ServiceMatchGame;
-import org.example.utils.MyDatabase;
+import  tn.esprit.entities.Equipe;
+import  tn.esprit.entities.MatchGame;
+import  tn.esprit.services.ServiceEquipe;
+import  tn.esprit.services.ServiceMatchGame;
+import  tn.esprit.utils.MyDatabase;
 
 import java.sql.Timestamp;
 
@@ -16,7 +16,7 @@ public class MainMatchGameEquipe {
         ServiceMatchGame serviceMatchGame = new ServiceMatchGame();
 
         try {
-          /* 
+          
             Equipe equipe = new Equipe("Equipe A", 11, "equipe-a.png");
             serviceEquipe.ajouter(equipe);
             serviceEquipe.getAll().forEach(System.out::println);
@@ -33,7 +33,6 @@ public class MainMatchGameEquipe {
             serviceEquipe.ajouter(equipe2);
             System.out.println("\n--- Toutes les équipes ---");
             serviceEquipe.getAll().forEach(System.out::println);
-*/
             MatchGame matchGame = new MatchGame(
                     Timestamp.valueOf("2026-04-08 10:00:00"),
                     0,
