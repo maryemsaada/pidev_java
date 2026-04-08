@@ -20,25 +20,23 @@ public class ServiceEquipe implements IService<Equipe> {
 
     @Override
     public void ajouter(Equipe equipe) throws SQLException {
-        String sql = "INSERT INTO equipe(nom, max_members, logo, owner_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO equipe(nom, max_members, logo, owner_id) VALUES (?, ?, ?, 10)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, equipe.getNom());
             ps.setInt(2, equipe.getMaxMembers());
             ps.setString(3, equipe.getLogo());
-            ps.setInt(4, equipe.getOwnerId());
             ps.executeUpdate();
         }
     }
 
     @Override
     public void modifier(Equipe equipe) throws SQLException {
-        String sql = "UPDATE equipe SET nom=?, max_members=?, logo=?, owner_id=? WHERE id=?";
+        String sql = "UPDATE equipe SET nom=?, max_members=?, logo=? WHERE id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, equipe.getNom());
             ps.setInt(2, equipe.getMaxMembers());
             ps.setString(3, equipe.getLogo());
-            ps.setInt(4, equipe.getOwnerId());
-            ps.setInt(5, equipe.getId());
+            ps.setInt(4, equipe.getId());
             ps.executeUpdate();
         }
     }
@@ -64,8 +62,7 @@ public class ServiceEquipe implements IService<Equipe> {
                         rs.getInt("id"),
                         rs.getString("nom"),
                         rs.getInt("max_members"),
-                        rs.getString("logo"),
-                        rs.getInt("owner_id")
+                    rs.getString("logo")
                 );
                 equipes.add(equipe);
             }
