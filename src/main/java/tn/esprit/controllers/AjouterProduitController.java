@@ -27,6 +27,7 @@ public class AjouterProduitController implements Initializable {
     @FXML private TextField nameField, descriptionField, priceField, stockField, imageField;
     @FXML private ComboBox<Category> categoryCombo;
     @FXML private Label messageLabel, titleLabel;
+    @FXML private Label nameError, descError, priceError, stockError, imageError, categoryError;
     @FXML private Button submitBtn;
     @FXML private ImageView imagePreview;
 
@@ -53,9 +54,233 @@ public class AjouterProduitController implements Initializable {
                 setText(empty || c == null ? "" : c.getName());
             }
         });
+
+        // Validation en temps réel à chaque frappe
+        nameField.textProperty().addListener((obs, old, val) -> validateName());
+        descriptionField.textProperty().addListener((obs, old, val) -> validateDescription());
+        priceField.textProperty().addListener((obs, old, val) -> validatePrice());
+        stockField.textProperty().addListener((obs, old, val) -> validateStock());
+        categoryCombo.valueProperty().addListener((obs, old, val) -> validateCategory());
     }
 
-    // ✅ Appelé depuis ProduitsController pour modifier
+    // ─── Règles de validation ───────────────────────────────────────────
+
+    private boolean validateName() {
+        String val = nameField.getText().trim();
+        if (val.isEmpty()) {
+            setError(nameField, nameError, "Le nom est obligatoire.");
+            return false;
+        }
+        if (val.length() < 2) {
+            setError(nameField, nameError, "Minimum 2 caractères.");
+            return false;
+        }
+        if (val.length() > 100) {
+            setError(nameField, nameError, "Maximum 100 caractères.");
+            return false;
+        }
+        if (!val.matches("[a-zA-ZÀ-ÿ0-9 \\-_']+")) {
+            setError(nameField, nameError, "Caractères spéciaux non autorisés.");
+            return false;
+        }
+        clearError(nameField, nameError);
+        return true;
+    }
+
+    private boolean validateDescription() {
+        String val = descriptionField.getText().trim();
+        if (val.length() > 500) {
+            setError(descriptionField, descError, "Maximum 500 caractères.");
+            return false;
+        }
+        clearError(descriptionField, descError);
+        return true;
+    }
+
+    private boolean validatePrice() {
+        String val = priceField.getText().trim();
+        if (val.isEmpty()) {
+            setError(priceField, priceError, "Le prix est obligatoire.");
+            return false;
+        }
+        try {
+            double price = Double.parseDouble(val);
+            if (price <= 0) {
+                setError(priceField, priceError, "Le prix doit être supérieur à 0.");
+                return false;
+            }
+            if (price > 99999) {
+                setError(priceField, priceError, "Le prix est trop élevé (max 99999).");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            setError(priceField, priceError, "Le prix doit être un nombre (ex: 19.99).");
+            return false;
+        }
+        clearError(priceField, priceError);
+        return true;
+    }
+
+    private boolean validateStock() {
+        String val = stockField.getText().trim();
+        if (val.isEmpty()) {
+            setError(stockField, stockError, "Le stock est obligatoire.");
+            return false;
+        }
+        try {
+            int stock = Integer.parseInt(val);
+            if (stock < 0) {
+                setError(stockField, stockError, "Le stock ne peut pas être négatif.");
+                return false;
+            }
+            if (stock > 99999) {
+                setError(stockField, stockError, "Stock trop élevé (max 99999).");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            setError(stockField, stockError, "Le stock doit être un nombre entier.");
+            return false;
+        }
+        clearError(stockField, stockError);
+        return true;
+    }
+
+    private boolean validateImage() {
+        if (selectedImagePath.isEmpty() && imageField.getText().trim().isEmpty()) {
+            setError(imageField, imageError, "Veuillez choisir une image.");
+            return false;
+        }
+        clearError(imageField, imageError);
+        return true;
+    }
+
+    private boolean validateCategory() {
+        if (categoryCombo.getValue() == null) {
+            categoryError.setText("Veuillez sélectionner une catégorie.");
+            categoryError.setVisible(true);
+            categoryCombo.setStyle("-fx-border-color: red; -fx-border-radius: 5;");
+            return false;
+        }
+        categoryError.setText("");
+        categoryError.setVisible(false);
+        categoryCombo.setStyle("-fx-border-color: #27ae60; -fx-border-radius: 5;");
+        return true;
+    }
+
+    // ─── Helpers visuels ────────────────────────────────────────────────
+
+    // ─── Helpers visuels ────────────────────────────────────────────────
+
+    private void setError(TextField field, Label errorLabel, String message) {
+        field.setStyle("-fx-border-color: red; -fx-border-radius: 5;");
+        errorLabel.setText("⚠ " + message);
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);   // ← prend de la place
+    }
+
+    private void clearError(TextField field, Label errorLabel) {
+        field.setStyle("-fx-border-color: #27ae60; -fx-border-radius: 5;");
+        errorLabel.setText("");
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);  // ← ne prend plus de place
+    }
+
+    // ─── Choisir image ──────────────────────────────────────────────────
+
+    @FXML
+    private void handleChooseImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choisir une image");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+
+        File selectedFile = fileChooser.showOpenDialog(imageField.getScene().getWindow());
+
+        if (selectedFile != null) {
+            // Vérifier taille max (2 MB)
+            if (selectedFile.length() > 2 * 1024 * 1024) {
+                setError(imageField, imageError, "Image trop lourde (max 2 MB).");
+                return;
+            }
+
+            try {
+                String destDir = "C:/wamp64/www/uploads/";
+                new File(destDir).mkdirs();
+                Path destination = Paths.get(destDir + selectedFile.getName());
+                Files.copy(selectedFile.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
+
+                selectedImagePath = selectedFile.getName();
+                imageField.setText(selectedImagePath);
+
+                Image image = new Image(selectedFile.toURI().toString());
+                imagePreview.setImage(image);
+                imagePreview.setVisible(true);
+
+                clearError(imageField, imageError);
+                messageLabel.setStyle("-fx-text-fill: #27ae60;");
+                messageLabel.setText("✅ Image sauvegardée !");
+
+            } catch (Exception e) {
+                setError(imageField, imageError, "Erreur : " + e.getMessage());
+            }
+        }
+    }
+
+    // ─── Submit ─────────────────────────────────────────────────────────
+
+    @FXML
+    private void handleSubmit() {
+        // Déclencher toutes les validations
+        boolean ok = validateName()
+                & validateDescription()
+                & validatePrice()
+                & validateStock()
+                & validateImage()
+                & validateCategory();
+
+        if (!ok) {
+            messageLabel.setStyle("-fx-text-fill: red;");
+            messageLabel.setText("❌ Corrigez les erreurs avant de continuer.");
+            return;
+        }
+
+        String name     = nameField.getText().trim();
+        String desc     = descriptionField.getText().trim();
+        double price    = Double.parseDouble(priceField.getText().trim());
+        int stock       = Integer.parseInt(stockField.getText().trim());
+        String image    = selectedImagePath.isEmpty() ? imageField.getText().trim() : selectedImagePath;
+        int catId       = categoryCombo.getValue().getId();
+
+        if (productToEdit == null) {
+            productService.addProduct(new Product(name, desc, price, stock, image, catId));
+            messageLabel.setStyle("-fx-text-fill: #27ae60;");
+            messageLabel.setText("✅ Produit ajouté !");
+        } else {
+            productToEdit.setName(name);
+            productToEdit.setDescription(desc);
+            productToEdit.setPrice(price);
+            productToEdit.setStock(stock);
+            productToEdit.setImage(image);
+            productToEdit.setCategoryId(catId);
+            productService.updateProduct(productToEdit);
+            messageLabel.setStyle("-fx-text-fill: #27ae60;");
+            messageLabel.setText("✅ Produit modifié !");
+        }
+
+        new Thread(() -> {
+            try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+            javafx.application.Platform.runLater(() ->
+                    ((Stage) nameField.getScene().getWindow()).close()
+            );
+        }).start();
+    }
+
+    @FXML
+    private void handleCancel() {
+        ((Stage) nameField.getScene().getWindow()).close();
+    }
+
     public void setProductToEdit(Product p) {
         this.productToEdit = p;
         titleLabel.setText("✏️ Modifier le Produit");
@@ -67,7 +292,6 @@ public class AjouterProduitController implements Initializable {
         imageField.setText(p.getImage());
         selectedImagePath = p.getImage();
 
-        // Afficher preview de l'image existante
         File imgFile = new File("C:/wamp64/www/uploads/" + p.getImage());
         if (imgFile.exists()) {
             imagePreview.setImage(new Image(imgFile.toURI().toString()));
@@ -80,99 +304,4 @@ public class AjouterProduitController implements Initializable {
                 .ifPresent(c -> categoryCombo.setValue(c));
     }
 
-    // ✅ FileChooser — choisir image depuis PC
-    @FXML
-    private void handleChooseImage() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choisir une image");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif")
-        );
-
-        File selectedFile = fileChooser.showOpenDialog(imageField.getScene().getWindow());
-
-        if (selectedFile != null) {
-            try {
-                // ✅ Copier dans wamp
-                String destDir = "C:/wamp64/www/uploads/";
-                new File(destDir).mkdirs();
-
-                Path destination = Paths.get(destDir + selectedFile.getName());
-                Files.copy(selectedFile.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
-
-                // Sauvegarder le nom
-                selectedImagePath = selectedFile.getName();
-                imageField.setText(selectedImagePath);
-
-                // Afficher preview
-                Image image = new Image(selectedFile.toURI().toString());
-                imagePreview.setImage(image);
-                imagePreview.setVisible(true);
-
-                messageLabel.setStyle("-fx-text-fill: #27ae60;");
-                messageLabel.setText("✅ Image sauvegardée !");
-
-            } catch (Exception e) {
-                messageLabel.setStyle("-fx-text-fill: red;");
-                messageLabel.setText("❌ Erreur image : " + e.getMessage());
-            }
-        }
-    }
-
-    // ✅ Ajouter ou Modifier
-    @FXML
-    private void handleSubmit() {
-        if (nameField.getText().isEmpty() || priceField.getText().isEmpty()
-                || stockField.getText().isEmpty() || categoryCombo.getValue() == null) {
-            messageLabel.setStyle("-fx-text-fill: red;");
-            messageLabel.setText("❌ Remplissez tous les champs !");
-            return;
-        }
-
-        try {
-            String name = nameField.getText();
-            String desc = descriptionField.getText();
-            double price = Double.parseDouble(priceField.getText());
-            int stock = Integer.parseInt(stockField.getText());
-            String image = selectedImagePath.isEmpty() ? imageField.getText() : selectedImagePath;
-            int catId = categoryCombo.getValue().getId();
-
-            if (productToEdit == null) {
-                // ➕ AJOUTER
-                productService.addProduct(
-                        new Product(name, desc, price, stock, image, catId)
-                );
-                messageLabel.setStyle("-fx-text-fill: #27ae60;");
-                messageLabel.setText("✅ Produit ajouté !");
-            } else {
-                // ✏️ MODIFIER
-                productToEdit.setName(name);
-                productToEdit.setDescription(desc);
-                productToEdit.setPrice(price);
-                productToEdit.setStock(stock);
-                productToEdit.setImage(image);
-                productToEdit.setCategoryId(catId);
-                productService.updateProduct(productToEdit);
-                messageLabel.setStyle("-fx-text-fill: #27ae60;");
-                messageLabel.setText("✅ Produit modifié !");
-            }
-
-            // Fermer après 1 seconde
-            new Thread(() -> {
-                try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
-                javafx.application.Platform.runLater(() ->
-                        ((Stage) nameField.getScene().getWindow()).close()
-                );
-            }).start();
-
-        } catch (NumberFormatException e) {
-            messageLabel.setStyle("-fx-text-fill: red;");
-            messageLabel.setText("❌ Prix et Stock doivent être des nombres !");
-        }
-    }
-
-    @FXML
-    private void handleCancel() {
-        ((Stage) nameField.getScene().getWindow()).close();
-    }
 }

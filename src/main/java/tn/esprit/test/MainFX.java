@@ -9,8 +9,10 @@ public class MainFX extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
+       FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
         stage.setTitle("🎮 Gaming Gear Management");
+       /*  FXMLLoader loader = new FXMLLoader(getClass().getResource("/afficherProduits.fxml"));
+        stage.setTitle("🛒 Gaming Gear");*/
         Scene scene = new Scene(loader.load());
 
         stage.setScene(scene);

@@ -1,0 +1,170 @@
+package tn.esprit.controllers;
+
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import tn.esprit.entities.Category;
+import tn.esprit.entities.Product;
+import tn.esprit.services.CategoryService;
+import tn.esprit.services.ProductService;
+
+import java.io.File;
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
+
+public class AfficherProduitsController implements Initializable {
+
+    @FXML private FlowPane productsContainer;
+    @FXML private VBox categoriesBox;
+    @FXML private TextField searchField;
+
+    private ProductService productService = new ProductService();
+    private CategoryService categoryService = new CategoryService();
+    private List<Product> allProducts;
+    private List<Category> allCategories;
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        allProducts = productService.getAllProducts();
+        allCategories = categoryService.getAllCategories();
+        loadCategoryButtons();
+        displayProducts(allProducts);
+    }
+
+    // ✅ Boutons catégories dynamiques
+    private void loadCategoryButtons() {
+        categoriesBox.getChildren().clear();
+        for (Category cat : allCategories) {
+            long count = allProducts.stream()
+                    .filter(p -> p.getCategoryId() == cat.getId()).count();
+
+            HBox row = new HBox();
+            row.setAlignment(Pos.CENTER_LEFT);
+            row.setSpacing(8);
+
+            Button btn = new Button(cat.getName());
+            btn.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(btn, Priority.ALWAYS);
+            btn.setStyle(
+                    "-fx-background-color: #0d2137; -fx-text-fill: white;" +
+                            "-fx-pref-height: 38px; -fx-cursor: hand;" +
+                            "-fx-background-radius: 20; -fx-font-size: 13px;" +
+                            "-fx-alignment: CENTER-LEFT; -fx-padding: 0 15;"
+            );
+
+            Label badge = new Label(String.valueOf(count));
+            badge.setStyle(
+                    "-fx-background-color: #7c3aed; -fx-text-fill: white;" +
+                            "-fx-background-radius: 20; -fx-padding: 3 10;" +
+                            "-fx-font-size: 12px;"
+            );
+
+            btn.setOnAction(e -> filterByCategory(cat.getId()));
+            row.getChildren().addAll(btn, badge);
+            categoriesBox.getChildren().add(row);
+        }
+    }
+
+    // ✅ Afficher les cartes
+    private void displayProducts(List<Product> products) {
+        productsContainer.getChildren().clear();
+        for (Product p : products) {
+            productsContainer.getChildren().add(createProductCard(p));
+        }
+    }
+
+    // ✅ Créer une carte produit
+    private VBox createProductCard(Product p) {
+        VBox card = new VBox(10);
+        card.setPrefWidth(220);
+        card.setMaxWidth(220);
+        card.setStyle(
+                "-fx-background-color: white; -fx-background-radius: 15;" +
+                        "-fx-padding: 15;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);"
+        );
+
+        // Image
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(190);
+        imageView.setFitHeight(150);
+        imageView.setPreserveRatio(true);
+
+        File imgFile = new File("C:/wamp64/www/uploads/" + p.getImage());
+        if (imgFile.exists()) {
+            imageView.setImage(new Image(imgFile.toURI().toString()));
+        }
+
+        // Nom
+        Label nameLabel = new Label(p.getName());
+        nameLabel.setStyle(
+                "-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"
+        );
+        nameLabel.setWrapText(true);
+
+        // Description
+        Label descLabel = new Label(p.getDescription());
+        descLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
+        descLabel.setWrapText(true);
+
+        // Catégorie
+        Category cat = categoryService.getCategoryById(p.getCategoryId());
+        Label catLabel = new Label("Category: " + (cat != null ? cat.getName() : "N/A"));
+        catLabel.setStyle("-fx-text-fill: #94a3b8; -fx-font-size: 11px;");
+
+        // Prix + ADD
+        HBox footer = new HBox(10);
+        footer.setAlignment(Pos.CENTER_LEFT);
+
+        Label priceLabel = new Label(String.format("%.2f TND", p.getPrice()));
+        priceLabel.setStyle(
+                "-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"
+        );
+        HBox.setHgrow(priceLabel, Priority.ALWAYS);
+
+        Button addBtn = new Button("🛒 ADD");
+        addBtn.setStyle(
+                "-fx-background-color: #7c3aed; -fx-text-fill: white;" +
+                        "-fx-cursor: hand; -fx-background-radius: 20;" +
+                        "-fx-pref-height: 35px; -fx-font-size: 12px; -fx-padding: 0 15;"
+        );
+
+        footer.getChildren().addAll(priceLabel, addBtn);
+        card.getChildren().addAll(imageView, nameLabel, descLabel, catLabel, footer);
+        return card;
+    }
+
+    // ✅ Filtre par catégorie
+    private void filterByCategory(int categoryId) {
+        List<Product> filtered = allProducts.stream()
+                .filter(p -> p.getCategoryId() == categoryId)
+                .toList();
+        displayProducts(filtered);
+    }
+
+    // ✅ Afficher tout
+    @FXML
+    private void showAll() {
+        displayProducts(allProducts);
+    }
+
+    // ✅ Recherche
+    @FXML
+    private void handleSearch() {
+        String keyword = searchField.getText().toLowerCase();
+        if (keyword.isEmpty()) {
+            displayProducts(allProducts);
+            return;
+        }
+        List<Product> filtered = allProducts.stream()
+                .filter(p -> p.getName().toLowerCase().contains(keyword)
+                        || p.getDescription().toLowerCase().contains(keyword))
+                .toList();
+        displayProducts(filtered);
+    }
+}
