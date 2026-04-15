@@ -5,9 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d9361db9-95ef-4837-b2cf-105c08edff2b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/tn/esprit/controllers/StreamController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/tn/esprit/entities/Stream.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/tn/esprit/services/ServiceStream.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/stream.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/tn/esprit/controllers/LoginController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/esprit/controllers/LoginController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/Login.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/Login.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/create_tables.sql" beforeDir="false" afterPath="$PROJECT_DIR$/create_tables.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/esprit/controllers/MainController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/esprit/controllers/MainController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tn/esprit/controllers/NavbarController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/tn/esprit/controllers/NavbarController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/Navbar.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/Navbar.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/main.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/main.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,10 +80,9 @@
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/MSI/pidev_java/src/main/resources/images&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/xampp2/htdocs/pidev_java/src/main/resources&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -88,17 +95,23 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\xampp2\htdocs\pidev_java\src\main\resources" />
       <recent name="C:\Users\MSI\pidev_java\src\main\resources\images" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\rajhi\pidev_java_aziz\src" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="tn.esprit.services" />
+      <recent name="tn.esprit.entities" />
+      <recent name="tn.esprit.controllers" />
     </key>
   </component>
   <component name="RunManager" selected="Application.MainFX">
     <configuration name="FxLauncher" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="tn.esprit.test.FxLauncher" />
       <module name="WorkshopJDBC-JavaFX-3A56" />
-      <option name="VM_PARAMETERS" value="--module-path &quot;C:\Users\dot\.m2\repository\org\openjfx\javafx-controls\21.0.2;C:\Users\dot\.m2\repository\org\openjfx\javafx-fxml\21.0.2;C:\Users\dot\.m2\repository\org\openjfx\javafx-graphics\21.0.2;C:\Users\dot\.m2\repository\org\openjfx\javafx-base\21.0.2&quot; --add-modules javafx.controls,javafx.fxml" />
+      <option name="VM_PARAMETERS" value="--module-path &quot;C:\Users\medam\.m2\repository\org\openjfx\javafx-controls\21.0.2\javafx-controls-21.0.2-win.jar;C:\Users\medam\.m2\repository\org\openjfx\javafx-fxml\21.0.2\javafx-fxml-21.0.2-win.jar;C:\Users\medam\.m2\repository\org\openjfx\javafx-graphics\21.0.2\javafx-graphics-21.0.2-win.jar;C:\Users\medam\.m2\repository\org\openjfx\javafx-base\21.0.2\javafx-base-21.0.2-win.jar&quot; --add-modules javafx.controls,javafx.fxml" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="tn.esprit.test.*" />
@@ -111,8 +124,8 @@
     </configuration>
     <configuration name="MainFX" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="tn.esprit.test.MainFX" />
-      <module name="pidev" />
-      <option name="VM_PARAMETERS" value="--module-path &quot;C:\Users\MSI\.m2\repository\org\openjfx\javafx-controls\21.0.2;C:\Users\MSI\.m2\repository\org\openjfx\javafx-fxml\21.0.2;C:\Users\MSI\.m2\repository\org\openjfx\javafx-graphics\21.0.2;C:\Users\MSI\.m2\repository\org\openjfx\javafx-base\21.0.2&quot; --add-modules javafx.controls,javafx.fxml" />
+      <module name="WorkshopJDBC-JavaFX-3A56" />
+      <option name="VM_PARAMETERS" value="--module-path &quot;C:\Users\Mouhamed Tayssir\.m2\repository\org\openjfx\javafx-controls\21.0.2\javafx-controls-21.0.2-win.jar;C:\Users\Mouhamed Tayssir\.m2\repository\org\openjfx\javafx-fxml\21.0.2\javafx-fxml-21.0.2-win.jar;C:\Users\Mouhamed Tayssir\.m2\repository\org\openjfx\javafx-graphics\21.0.2\javafx-graphics-21.0.2-win.jar;C:\Users\Mouhamed Tayssir\.m2\repository\org\openjfx\javafx-base\21.0.2\javafx-base-21.0.2-win.jar;C:\Users\Mouhamed Tayssir\.m2\repository\org\openjfx\javafx-media\21.0.2\javafx-media-21.0.2-win.jar&quot; --add-modules javafx.controls,javafx.fxml,javafx.media" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="tn.esprit.test.*" />
@@ -191,10 +204,8 @@
       <workItem from="1776126702741" duration="1533000" />
       <workItem from="1776128852842" duration="1269000" />
       <workItem from="1776170825743" duration="7074000" />
-      <workItem from="1776276981033" duration="1226000" />
-      <workItem from="1776287398217" duration="1087000" />
-      <workItem from="1776288521646" duration="375000" />
-      <workItem from="1776288933443" duration="4311000" />
+      <workItem from="1776198515867" duration="4705000" />
+      <workItem from="1776277936512" duration="12463000" />
     </task>
     <servers />
   </component>
