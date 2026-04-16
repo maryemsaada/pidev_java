@@ -59,6 +59,16 @@ public class AjouterEquipeController implements Initializable {
             return;
         }
 
+        if (nom.length() < 3) {
+            showError("Le nom doit contenir au moins 3 caracteres.");
+            return;
+        }
+
+        if (nom.length() > 60) {
+            showError("Le nom ne doit pas depasser 60 caracteres.");
+            return;
+        }
+
         int maxMembers;
         try {
             maxMembers = Integer.parseInt(maxMembersRaw);
@@ -72,8 +82,20 @@ public class AjouterEquipeController implements Initializable {
             return;
         }
 
+        if (maxMembers > 100) {
+            showError("Max members doit etre inferieur ou egal a 100.");
+            return;
+        }
+
         if (logo.isEmpty()) {
             showError("Le logo est obligatoire.");
+            return;
+        }
+
+        String logoLower = logo.toLowerCase();
+        if (!(logoLower.endsWith(".png") || logoLower.endsWith(".jpg") || logoLower.endsWith(".jpeg")
+                || logoLower.endsWith(".gif") || logoLower.endsWith(".webp"))) {
+            showError("Le logo doit etre une image (.png, .jpg, .jpeg, .gif, .webp).");
             return;
         }
 

@@ -8,6 +8,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Control;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import tn.esprit.entities.User;
 import tn.esprit.services.ServiceUser;
@@ -26,6 +28,10 @@ public class AjouterUserController implements Initializable {
     @FXML private CheckBox activeCheckBox;
     @FXML private Label messageLabel;
     @FXML private Button submitBtn;
+    @FXML private Label nomError;
+    @FXML private Label emailError;
+    @FXML private Label passwordError;
+    @FXML private Label rolesError;
 
     private final ServiceUser serviceUser = new ServiceUser();
     private User userToEdit;
@@ -34,12 +40,18 @@ public class AjouterUserController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         rolesField.setText("[\"ROLE_USER\"]");
         activeCheckBox.setSelected(true);
+
+        // Ajout des listeners pour les validations en temps réel
+        nomField.textProperty().addListener((obs, old, val) -> validateNom());
+        emailField.textProperty().addListener((obs, old, val) -> validateEmail());
+        passwordField.textProperty().addListener((obs, old, val) -> validatePassword());
+        rolesField.textProperty().addListener((obs, old, val) -> validateRoles());
     }
 
     public void setUserToEdit(User user) {
         this.userToEdit = user;
         titleLabel.setText("Modifier Utilisateur");
-        submitBtn.setText("Modifier");
+        submitBtn.setText("💾 Modifier");
         nomField.setText(user.getNom());
         emailField.setText(user.getEmail());
         passwordField.setText(user.getPassword());
@@ -54,24 +66,27 @@ public class AjouterUserController implements Initializable {
         String password = passwordField.getText();
         String roles = rolesField.getText().trim();
 
-        if (nom.isEmpty() || email.isEmpty() || password.isEmpty() || roles.isEmpty()) {
-            showMessage("Tous les champs sont obligatoires.", true);
-            return;
-        }
+        // Valider tous les champs
+        boolean nomOk = validateNom();
+        boolean emailOk = validateEmail();
+        boolean passwordOk = validatePassword();
+        boolean rolesOk = validateRoles();
 
-        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-            showMessage("Email invalide.", true);
+        if (!nomOk || !emailOk || !passwordOk || !rolesOk) {
+            showMessage("❌ Corrigez les erreurs avant de continuer.", true);
             return;
         }
 
         try {
             if (userToEdit == null && serviceUser.emailExists(email)) {
-                showMessage("Cet email existe deja.", true);
+                setError(emailField, emailError, "Cet email existe déjà.");
+                showMessage("❌ Cet email existe déjà.", true);
                 return;
             }
 
             if (userToEdit != null && serviceUser.emailExistsForOtherUser(email, userToEdit.getId())) {
-                showMessage("Cet email est deja utilise par un autre utilisateur.", true);
+                setError(emailField, emailError, "Cet email est déjà utilisé par un autre utilisateur.");
+                showMessage("❌ Cet email est déjà utilisé par un autre utilisateur.", true);
                 return;
             }
 
@@ -90,7 +105,7 @@ public class AjouterUserController implements Initializable {
                         false
                 );
                 serviceUser.ajouter(user);
-                showMessage("Utilisateur ajoute avec succes.", false);
+                showMessage("✅ Utilisateur ajouté avec succès.", false);
             } else {
                 userToEdit.setNom(nom);
                 userToEdit.setEmail(email);
@@ -98,13 +113,105 @@ public class AjouterUserController implements Initializable {
                 userToEdit.setRoles(roles);
                 userToEdit.setActive(activeCheckBox.isSelected());
                 serviceUser.modifier(userToEdit);
-                showMessage("Utilisateur modifie avec succes.", false);
+                showMessage("✅ Utilisateur modifié avec succès.", false);
             }
 
             closeAfterDelay();
         } catch (SQLException e) {
-            showMessage("Erreur base de donnees : " + e.getMessage(), true);
+            showMessage("❌ Erreur base de données : " + e.getMessage(), true);
         }
+    }
+
+    private boolean validateNom() {
+        String nom = nomField.getText().trim();
+
+        if (nom.isEmpty()) {
+            setError(nomField, nomError, "Le nom est obligatoire.");
+            return false;
+        }
+
+        if (nom.length() < 3) {
+            setError(nomField, nomError, "Le nom doit contenir au moins 3 caractères.");
+            return false;
+        }
+
+        if (nom.length() > 100) {
+            setError(nomField, nomError, "Le nom ne peut pas dépasser 100 caractères.");
+            return false;
+        }
+
+        clearError(nomField, nomError);
+        return true;
+    }
+
+    private boolean validateEmail() {
+        String email = emailField.getText().trim();
+
+        if (email.isEmpty()) {
+            setError(emailField, emailError, "L'email est obligatoire.");
+            return false;
+        }
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            setError(emailField, emailError, "Veuillez entrer un email valide.");
+            return false;
+        }
+
+        clearError(emailField, emailError);
+        return true;
+    }
+
+    private boolean validatePassword() {
+        String password = passwordField.getText();
+
+        if (password.isEmpty()) {
+            setError(passwordField, passwordError, "Le mot de passe est obligatoire.");
+            return false;
+        }
+
+        if (password.length() < 6) {
+            setError(passwordField, passwordError, "Le mot de passe doit contenir au moins 6 caractères.");
+            return false;
+        }
+
+        if (password.length() > 50) {
+            setError(passwordField, passwordError, "Le mot de passe ne peut pas dépasser 50 caractères.");
+            return false;
+        }
+
+        clearError(passwordField, passwordError);
+        return true;
+    }
+
+    private boolean validateRoles() {
+        String roles = rolesField.getText().trim();
+
+        if (roles.isEmpty()) {
+            setError(rolesField, rolesError, "Les rôles sont obligatoires.");
+            return false;
+        }
+
+        if (!roles.startsWith("[") || !roles.endsWith("]")) {
+            setError(rolesField, rolesError, "Le format des rôles doit être : [\"ROLE_...\"]");
+            return false;
+        }
+
+        clearError(rolesField, rolesError);
+        return true;
+    }
+
+    private void setError(Control field, Label errorLabel, String message) {
+        field.setStyle("-fx-border-color: #ef4444; -fx-border-radius: 5;");
+        errorLabel.setText("⚠ " + message);
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);
+    }
+
+    private void clearError(Control field, Label errorLabel) {
+        field.setStyle("-fx-border-color: #10b981; -fx-border-radius: 5;");
+        errorLabel.setText("");
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
     }
 
     @FXML
@@ -113,7 +220,7 @@ public class AjouterUserController implements Initializable {
     }
 
     private void showMessage(String message, boolean error) {
-        messageLabel.setStyle(error ? "-fx-text-fill: #e74c3c;" : "-fx-text-fill: #27ae60;");
+        messageLabel.setStyle(error ? "-fx-text-fill: #ef4444;" : "-fx-text-fill: #10b981;");
         messageLabel.setText(message);
     }
 

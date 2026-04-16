@@ -26,31 +26,44 @@ public class LoginController {
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     @FXML private Label messageLabel;
+    @FXML private Label emailError;
+    @FXML private Label passwordError;
     @FXML private Button loginButton;
 
     @FXML
-    public void initialize() {}
+    public void initialize() {
+        // Ajout des listeners pour les validations en temps réel
+        usernameField.textProperty().addListener((obs, old, val) -> validateEmail());
+        passwordField.textProperty().addListener((obs, old, val) -> validatePassword());
+    }
 
     @FXML
     private void handleLogin() {
         String username = usernameField.getText().trim();
         String password = passwordField.getText();
 
-        if (username.isEmpty() || password.isEmpty()) {
-            showMessage("Please fill in all fields.", true);
+        // Valider les champs
+        boolean emailOk = validateEmail();
+        boolean passwordOk = validatePassword();
+
+        if (!emailOk || !passwordOk) {
+            messageLabel.setTextFill(Color.RED);
+            messageLabel.setText("❌ Corrigez les erreurs avant de continuer.");
             return;
         }
 
         try {
             User user = serviceUser.authenticate(username, password);
             if (user == null) {
-                showMessage("Invalid credentials.", true);
+                messageLabel.setTextFill(Color.RED);
+                messageLabel.setText("❌ Identifiants invalides.");
                 return;
             }
 
             // User exists → navigate to Home or admin dashboard
             SessionManager.setCurrentUser(user);
-            showMessage("Welcome, " + user.getNom() + "!", false);
+            messageLabel.setTextFill(Color.web("#5b4cdf"));
+            messageLabel.setText("✅ Bienvenue, " + user.getNom() + "!");
             String fxml = "/home.fxml";
             if ("admin@gmail.com".equalsIgnoreCase(user.getEmail())) {
                 fxml = "/main.fxml";
@@ -62,10 +75,60 @@ public class LoginController {
             stage.show();
 
         } catch (SQLException e) {
-            showMessage("Database error: " + e.getMessage(), true);
+            messageLabel.setTextFill(Color.RED);
+            messageLabel.setText("❌ Erreur base de données : " + e.getMessage());
         } catch (IOException e) {
-            showMessage("Unable to open Home page.", true);
+            messageLabel.setTextFill(Color.RED);
+            messageLabel.setText("❌ Impossible d'ouvrir la page d'accueil.");
         }
+    }
+
+    private boolean validateEmail() {
+        String email = usernameField.getText().trim();
+        
+        if (email.isEmpty()) {
+            setError(usernameField, emailError, "L'email est obligatoire.");
+            return false;
+        }
+        
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            setError(usernameField, emailError, "Veuillez entrer un email valide.");
+            return false;
+        }
+        
+        clearError(usernameField, emailError);
+        return true;
+    }
+
+    private boolean validatePassword() {
+        String password = passwordField.getText();
+        
+        if (password.isEmpty()) {
+            setError(passwordField, passwordError, "Le mot de passe est obligatoire.");
+            return false;
+        }
+        
+        if (password.length() < 6) {
+            setError(passwordField, passwordError, "Le mot de passe doit contenir au moins 6 caractères.");
+            return false;
+        }
+        
+        clearError(passwordField, passwordError);
+        return true;
+    }
+
+    private void setError(Control field, Label errorLabel, String message) {
+        field.setStyle("-fx-border-color: red; -fx-border-radius: 5;");
+        errorLabel.setText("⚠ " + message);
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);
+    }
+
+    private void clearError(Control field, Label errorLabel) {
+        field.setStyle("-fx-border-color: transparent transparent #27ae60 transparent; -fx-border-width: 0 0 1.5 0;");
+        errorLabel.setText("");
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
     }
 
     @FXML
@@ -73,7 +136,8 @@ public class LoginController {
         try {
             loadScene(event, "/Register.fxml", "Register");
         } catch (IOException e) {
-            showMessage("Unable to open register form.", true);
+            messageLabel.setTextFill(Color.RED);
+            messageLabel.setText("❌ Impossible d'ouvrir le formulaire d'inscription.");
         }
     }
 
@@ -83,10 +147,5 @@ public class LoginController {
         stage.setScene(new Scene(root));
         stage.setTitle(title);
         stage.show();
-    }
-
-    private void showMessage(String msg, boolean isError) {
-        messageLabel.setText(msg);
-        messageLabel.setTextFill(isError ? Color.RED : Color.web("#5b4cdf"));
     }
 }

@@ -42,6 +42,8 @@
                        style="-fx-font-size: 11px; -fx-text-fill: #777;"/>
                 <TextField fx:id="nomField" promptText="Enter your full name"
                            style="-fx-background-color: transparent; -fx-border-color: transparent transparent #bbb transparent; -fx-border-width: 0 0 1.5 0; -fx-padding: 6 0; -fx-font-size: 14px;"/>
+                <Label fx:id="nomError" text="" visible="false" managed="false"
+                       style="-fx-font-size: 11px; -fx-text-fill: red; -fx-padding: 4 0 0 0;"/>
             </VBox>
 
             <VBox spacing="4">
@@ -49,6 +51,8 @@
                        style="-fx-font-size: 11px; -fx-text-fill: #777;"/>
                 <TextField fx:id="emailField" promptText="Enter your email"
                            style="-fx-background-color: transparent; -fx-border-color: transparent transparent #bbb transparent; -fx-border-width: 0 0 1.5 0; -fx-padding: 6 0; -fx-font-size: 14px;"/>
+                <Label fx:id="emailError" text="" visible="false" managed="false"
+                       style="-fx-font-size: 11px; -fx-text-fill: red; -fx-padding: 4 0 0 0;"/>
             </VBox>
 
             <VBox spacing="4">
@@ -56,6 +60,8 @@
                        style="-fx-font-size: 11px; -fx-text-fill: #777;"/>
                 <PasswordField fx:id="passwordField" promptText="Choose a password"
                                style="-fx-background-color: transparent; -fx-border-color: transparent transparent #bbb transparent; -fx-border-width: 0 0 1.5 0; -fx-padding: 6 0; -fx-font-size: 14px;"/>
+                <Label fx:id="passwordError" text="" visible="false" managed="false"
+                       style="-fx-font-size: 11px; -fx-text-fill: red; -fx-padding: 4 0 0 0;"/>
             </VBox>
 
             <VBox spacing="4">
@@ -63,6 +69,8 @@
                        style="-fx-font-size: 11px; -fx-text-fill: #777;"/>
                 <PasswordField fx:id="confirmPasswordField" promptText="Repeat your password"
                                style="-fx-background-color: transparent; -fx-border-color: transparent transparent #bbb transparent; -fx-border-width: 0 0 1.5 0; -fx-padding: 6 0; -fx-font-size: 14px;"/>
+                <Label fx:id="confirmPasswordError" text="" visible="false" managed="false"
+                       style="-fx-font-size: 11px; -fx-text-fill: red; -fx-padding: 4 0 0 0;"/>
             </VBox>
 
             <Button fx:id="registerButton" text="Register"
