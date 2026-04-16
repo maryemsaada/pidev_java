@@ -1,4 +1,4 @@
-package tn.esprit.controllers;
+package tn.esprit.controllers.equipe;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -6,7 +6,9 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -21,7 +23,10 @@ import tn.esprit.services.ServiceEquipe;
 import java.io.File;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class AfficherEquipeController implements Initializable {
@@ -32,28 +37,85 @@ public class AfficherEquipeController implements Initializable {
     private Label totalTeamsLabel;
     @FXML
     private Label messageLabel;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ComboBox<String> sortCombo;
 
     private final ServiceEquipe serviceEquipe = new ServiceEquipe();
+    private final List<Equipe> allEquipes = new ArrayList<>();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        setupSearchAndSort();
         loadEquipes();
+    }
+
+    private void setupSearchAndSort() {
+        sortCombo.getItems().addAll("Nom A-Z", "Nom Z-A", "Max members croissant", "Max members decroissant");
+        sortCombo.getSelectionModel().select("Nom A-Z");
+
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> renderCards());
+        sortCombo.valueProperty().addListener((obs, oldVal, newVal) -> renderCards());
     }
 
     private void loadEquipes() {
         try {
             List<Equipe> equipes = serviceEquipe.getAll();
+            allEquipes.clear();
+            allEquipes.addAll(equipes);
             totalTeamsLabel.setText(String.valueOf(equipes.size()));
-            cardsContainer.getChildren().clear();
-
-            int rank = 1;
-            for (Equipe equipe : equipes) {
-                cardsContainer.getChildren().add(buildCard(equipe, rank++));
-            }
+            renderCards();
             messageLabel.setText("");
         } catch (SQLException e) {
             messageLabel.setText("Erreur chargement equipes : " + e.getMessage());
         }
+    }
+
+    private void renderCards() {
+        String keyword = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase(Locale.ROOT);
+
+        List<Equipe> filtered = new ArrayList<>();
+        for (Equipe equipe : allEquipes) {
+            if (keyword.isEmpty()
+                    || safeLower(equipe.getNom()).contains(keyword)
+                    || safeLower(equipe.getLogo()).contains(keyword)
+                    || String.valueOf(equipe.getId()).contains(keyword)
+                    || String.valueOf(equipe.getMaxMembers()).contains(keyword)) {
+                filtered.add(equipe);
+            }
+        }
+
+        filtered.sort(getSortComparator(sortCombo.getValue()));
+
+        cardsContainer.getChildren().clear();
+        int rank = 1;
+        for (Equipe equipe : filtered) {
+            cardsContainer.getChildren().add(buildCard(equipe, rank++));
+        }
+
+        if (filtered.isEmpty()) {
+            messageLabel.setText("Aucune equipe trouvee.");
+        } else {
+            messageLabel.setText("");
+        }
+    }
+
+    private Comparator<Equipe> getSortComparator(String sortValue) {
+        if ("Nom Z-A".equals(sortValue)) {
+            return Comparator.comparing((Equipe e) -> safeLower(e.getNom())).reversed();
+        }
+        if ("Max members croissant".equals(sortValue)) {
+            return Comparator.comparingInt(Equipe::getMaxMembers);
+        }
+        if ("Max members decroissant".equals(sortValue)) {
+            return Comparator.comparingInt(Equipe::getMaxMembers).reversed();
+        }
+        return Comparator.comparing(e -> safeLower(e.getNom()));
+    }
+
+    private String safeLower(String value) {
+        return value == null ? "" : value.toLowerCase(Locale.ROOT);
     }
 
     private VBox buildCard(Equipe equipe, int rank) {

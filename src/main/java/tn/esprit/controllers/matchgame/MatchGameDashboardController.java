@@ -1,4 +1,4 @@
-package tn.esprit.controllers;
+package tn.esprit.controllers.matchgame;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -9,10 +9,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -22,15 +24,16 @@ import tn.esprit.services.ServiceMatchGame;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class MatchGameDashboardController implements Initializable {
 
     @FXML
     private TableView<MatchGame> matchTable;
-    @FXML
-    private TableColumn<MatchGame, Integer> idCol;
     @FXML
     private TableColumn<MatchGame, java.sql.Timestamp> dateCol;
     @FXML
@@ -51,17 +54,37 @@ public class MatchGameDashboardController implements Initializable {
     private Label messageLabel;
     @FXML
     private Label totalMatchsLabel;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ComboBox<String> sortCombo;
 
     private final ServiceMatchGame serviceMatchGame = new ServiceMatchGame();
+    private final List<MatchGame> allMatchs = new ArrayList<>();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setupColumns();
+        setupSearchAndSort();
         loadMatchs();
     }
 
+    private void setupSearchAndSort() {
+        sortCombo.setItems(FXCollections.observableArrayList(
+                "Date recente",
+                "Date ancienne",
+                "ID croissant",
+                "ID decroissant",
+                "Statut A-Z",
+                "Statut Z-A"
+        ));
+        sortCombo.getSelectionModel().select("Date recente");
+
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> applyFilterAndSort());
+        sortCombo.valueProperty().addListener((obs, oldVal, newVal) -> applyFilterAndSort());
+    }
+
     private void setupColumns() {
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         dateCol.setCellValueFactory(new PropertyValueFactory<>("dateMatch"));
         score1Col.setCellValueFactory(new PropertyValueFactory<>("scoreTeam1"));
         score2Col.setCellValueFactory(new PropertyValueFactory<>("scoreTeam2"));
@@ -101,7 +124,9 @@ public class MatchGameDashboardController implements Initializable {
     private void loadMatchs() {
         try {
             List<MatchGame> list = serviceMatchGame.getAll();
-            matchTable.setItems(FXCollections.observableArrayList(list));
+            allMatchs.clear();
+            allMatchs.addAll(list);
+            applyFilterAndSort();
             totalMatchsLabel.setText(String.valueOf(list.size()));
             messageLabel.setText("");
         } catch (SQLException e) {
@@ -110,10 +135,61 @@ public class MatchGameDashboardController implements Initializable {
         }
     }
 
+    private void applyFilterAndSort() {
+        String keyword = searchField == null || searchField.getText() == null
+                ? ""
+                : searchField.getText().trim().toLowerCase(Locale.ROOT);
+
+        List<MatchGame> filtered = new ArrayList<>();
+        for (MatchGame match : allMatchs) {
+            if (keyword.isEmpty() || matchesKeyword(match, keyword)) {
+                filtered.add(match);
+            }
+        }
+
+        Comparator<MatchGame> comparator = getSortComparator(sortCombo == null ? null : sortCombo.getValue());
+        filtered.sort(comparator);
+        matchTable.setItems(FXCollections.observableArrayList(filtered));
+    }
+
+    private boolean matchesKeyword(MatchGame match, String keyword) {
+        return String.valueOf(match.getId()).contains(keyword)
+                || String.valueOf(match.getEquipe1Id()).contains(keyword)
+                || String.valueOf(match.getEquipe2Id()).contains(keyword)
+                || String.valueOf(match.getTournoiId()).contains(keyword)
+                || safeLower(match.getStatut()).contains(keyword)
+                || safeLower(String.valueOf(match.getDateMatch())).contains(keyword)
+                || safeLower(String.valueOf(match.getScoreTeam1())).contains(keyword)
+                || safeLower(String.valueOf(match.getScoreTeam2())).contains(keyword);
+    }
+
+    private Comparator<MatchGame> getSortComparator(String sortValue) {
+        if ("Date ancienne".equals(sortValue)) {
+            return Comparator.comparing(MatchGame::getDateMatch, Comparator.nullsLast(Comparator.naturalOrder()));
+        }
+        if ("ID croissant".equals(sortValue)) {
+            return Comparator.comparingInt(MatchGame::getId);
+        }
+        if ("ID decroissant".equals(sortValue)) {
+            return Comparator.comparingInt(MatchGame::getId).reversed();
+        }
+        if ("Statut A-Z".equals(sortValue)) {
+            return Comparator.comparing(m -> safeLower(m.getStatut()));
+        }
+        if ("Statut Z-A".equals(sortValue)) {
+            return Comparator.comparing((MatchGame m) -> safeLower(m.getStatut())).reversed();
+        }
+        return Comparator.comparing(MatchGame::getDateMatch, Comparator.nullsLast(Comparator.reverseOrder()));
+    }
+
+    private String safeLower(String value) {
+        return value == null ? "" : value.toLowerCase(Locale.ROOT);
+    }
+
     @FXML
     private void handleNewMatch() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ajouterMatchGame.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/matchgame/ajouterMatchGame.fxml"));
             Parent root = loader.load();
             Stage stage = new Stage();
             stage.setTitle("Ajouter match");
@@ -128,7 +204,7 @@ public class MatchGameDashboardController implements Initializable {
 
     private void openEditWindow(MatchGame match) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ajouterMatchGame.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/matchgame/ajouterMatchGame.fxml"));
             Parent root = loader.load();
             AjouterMatchGameController controller = loader.getController();
             controller.setMatchToEdit(match);

@@ -1,4 +1,4 @@
-package tn.esprit.controllers;
+package tn.esprit.controllers.equipe;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -9,10 +9,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -22,15 +24,16 @@ import tn.esprit.services.ServiceEquipe;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class EquipeDashboardController implements Initializable {
 
     @FXML
     private TableView<Equipe> equipeTable;
-    @FXML
-    private TableColumn<Equipe, Integer> idCol;
     @FXML
     private TableColumn<Equipe, String> nomCol;
     @FXML
@@ -43,17 +46,37 @@ public class EquipeDashboardController implements Initializable {
     private Label messageLabel;
     @FXML
     private Label totalEquipesLabel;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ComboBox<String> sortCombo;
 
     private final ServiceEquipe serviceEquipe = new ServiceEquipe();
+    private final List<Equipe> allEquipes = new ArrayList<>();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setupColumns();
+        setupSearchAndSort();
         loadEquipes();
     }
 
+    private void setupSearchAndSort() {
+        sortCombo.setItems(FXCollections.observableArrayList(
+                "ID croissant",
+                "ID decroissant",
+                "Nom A-Z",
+                "Nom Z-A",
+                "Max members croissant",
+                "Max members decroissant"
+        ));
+        sortCombo.getSelectionModel().select("ID decroissant");
+
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> applyFilterAndSort());
+        sortCombo.valueProperty().addListener((obs, oldVal, newVal) -> applyFilterAndSort());
+    }
+
     private void setupColumns() {
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         nomCol.setCellValueFactory(new PropertyValueFactory<>("nom"));
         maxMembersCol.setCellValueFactory(new PropertyValueFactory<>("maxMembers"));
         logoCol.setCellValueFactory(new PropertyValueFactory<>("logo"));
@@ -89,13 +112,59 @@ public class EquipeDashboardController implements Initializable {
     private void loadEquipes() {
         try {
             List<Equipe> list = serviceEquipe.getAll();
-            equipeTable.setItems(FXCollections.observableArrayList(list));
+            allEquipes.clear();
+            allEquipes.addAll(list);
+            applyFilterAndSort();
             totalEquipesLabel.setText(String.valueOf(list.size()));
             messageLabel.setText("");
         } catch (SQLException e) {
             messageLabel.setStyle("-fx-text-fill: #e74c3c;");
             messageLabel.setText("Erreur chargement equipes : " + e.getMessage());
         }
+    }
+
+    private void applyFilterAndSort() {
+        String keyword = searchField == null || searchField.getText() == null
+                ? ""
+                : searchField.getText().trim().toLowerCase(Locale.ROOT);
+
+        List<Equipe> filtered = new ArrayList<>();
+        for (Equipe equipe : allEquipes) {
+            if (keyword.isEmpty()
+                    || String.valueOf(equipe.getId()).contains(keyword)
+                    || safeLower(equipe.getNom()).contains(keyword)
+                    || safeLower(equipe.getLogo()).contains(keyword)
+                    || String.valueOf(equipe.getMaxMembers()).contains(keyword)) {
+                filtered.add(equipe);
+            }
+        }
+
+        Comparator<Equipe> comparator = getSortComparator(sortCombo == null ? null : sortCombo.getValue());
+        filtered.sort(comparator);
+        equipeTable.setItems(FXCollections.observableArrayList(filtered));
+    }
+
+    private Comparator<Equipe> getSortComparator(String sortValue) {
+        if ("ID croissant".equals(sortValue)) {
+            return Comparator.comparingInt(Equipe::getId);
+        }
+        if ("Nom A-Z".equals(sortValue)) {
+            return Comparator.comparing(e -> safeLower(e.getNom()));
+        }
+        if ("Nom Z-A".equals(sortValue)) {
+            return Comparator.comparing((Equipe e) -> safeLower(e.getNom())).reversed();
+        }
+        if ("Max members croissant".equals(sortValue)) {
+            return Comparator.comparingInt(Equipe::getMaxMembers);
+        }
+        if ("Max members decroissant".equals(sortValue)) {
+            return Comparator.comparingInt(Equipe::getMaxMembers).reversed();
+        }
+        return Comparator.comparingInt(Equipe::getId).reversed();
+    }
+
+    private String safeLower(String value) {
+        return value == null ? "" : value.toLowerCase(Locale.ROOT);
     }
 
     @FXML

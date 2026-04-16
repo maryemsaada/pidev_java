@@ -53,7 +53,7 @@ public class MainController implements Initializable {
 
     @FXML
     public void showMatchGames() {
-        loadPage("/matchGameDashboard.fxml");
+        loadPage("/matchgame/matchGameDashboard.fxml");
     }
 
     @FXML

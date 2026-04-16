@@ -1,4 +1,4 @@
-package tn.esprit.controllers;
+package tn.esprit.controllers.equipe;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;

@@ -1,4 +1,4 @@
-package tn.esprit.controllers;
+package tn.esprit.controllers.matchgame;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
